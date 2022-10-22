@@ -6,7 +6,7 @@ plugins {
     id 'java'
 }
 
-group 'run.halo.starter'
+group 'run.halo.lightgallery'
 version '0.0.1-SNAPSHOT'
 sourceCompatibility = JavaVersion.VERSION_17
 
@@ -51,7 +51,7 @@ test {
 }
 
 node {
-    nodeProjectDir = file("${project.projectDir}/console")
+    nodeProjectDir = file("${project.projectDir}/assets")
 }
 
 task buildFrontend(type: NpxTask) {
