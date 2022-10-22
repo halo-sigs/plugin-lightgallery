@@ -9,9 +9,9 @@ import run.halo.app.plugin.BasePlugin;
  * @since 2.0.0
  */
 @Component
-public class LightgalleryPlugin extends BasePlugin {
+public class LightGalleryPlugin extends BasePlugin {
 
-    public LightgalleryPlugin(PluginWrapper wrapper) {
+    public LightGalleryPlugin(PluginWrapper wrapper) {
         super(wrapper);
     }
 
