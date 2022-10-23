@@ -8,6 +8,9 @@ import org.thymeleaf.processor.element.IElementModelStructureHandler;
 import reactor.core.publisher.Mono;
 import run.halo.app.theme.dialect.TemplateHeadProcessor;
 
+/**
+ * @author ryanwang
+ */
 @Component
 public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
 
@@ -30,19 +33,20 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
     private String lightGalleryScript() {
         return """
                 <!-- PluginLightGallery start -->
-                <link href="/assets/PluginLightGallery/static/css/lightgallery.min.css" rel="stylesheet" />
-                <script src="/assets/PluginLightGallery/static/js/lightgallery.min.js"></script>
+                <link href="/plugins/PluginLightGallery/assets/static/css/lightgallery.min.css" rel="stylesheet" />
+                <script src="/plugins/PluginLightGallery/assets/static/js/lightgallery.min.js"></script>
                 <script type="text/javascript">
-                   const imageNodes = document.querySelectorAll("#content img");
-                   imageNodes.forEach(function (node) {
-                     if (node) {
-                       node.dataset.src = node.src;
-                     }
-                   });
-                               
-                   lightGallery(document.getElementById("content"), {
-                     selector: "img",
-                   });
+                    document.addEventListener("DOMContentLoaded", function () {
+                      const imageNodes = document.querySelectorAll("#content img");
+                      imageNodes.forEach(function (node) {
+                        if (node) {
+                          node.dataset.src = node.src;
+                        }
+                      });
+                      lightGallery(document.getElementById("content"), {
+                        selector: "img",
+                      });
+                    });
                 </script>
                 <!-- PluginLightGallery end -->
                 """;

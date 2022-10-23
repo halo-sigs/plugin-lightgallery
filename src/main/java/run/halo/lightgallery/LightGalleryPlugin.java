@@ -5,8 +5,7 @@ import org.springframework.stereotype.Component;
 import run.halo.app.plugin.BasePlugin;
 
 /**
- * @author guqing
- * @since 2.0.0
+ * @author ryanwang
  */
 @Component
 public class LightGalleryPlugin extends BasePlugin {
