@@ -11,7 +11,7 @@ spec:
   settingName: plugin-lightgallery-settings
   configMapName: plugin-lightgallery-configMap
   homepage: https://github.com/halo-sigs/plugin-lightgallery
-  displayName: "lightGallery 灯箱"
-  description: "对 lightGallery 的集成，支持在内容页放大图片预览"
+  displayName: "lightgallery.js 灯箱"
+  description: "提供对 lightgallery.js 的集成，支持在内容页放大显示图片"
   license:
     - name: "MIT"
