@@ -8,7 +8,9 @@ import org.thymeleaf.model.IModelFactory;
 import org.thymeleaf.processor.element.IElementModelStructureHandler;
 import reactor.core.publisher.Mono;
 import run.halo.app.plugin.SettingFetcher;
+import run.halo.app.theme.DefaultTemplateEnum;
 import run.halo.app.theme.dialect.TemplateHeadProcessor;
+import run.halo.app.theme.router.strategy.ModelConst;
 
 /**
  * @author ryanwang
@@ -25,6 +27,9 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
     @Override
     public Mono<Void> process(ITemplateContext context, IModel model,
                               IElementModelStructureHandler structureHandler) {
+        if (!isContentTemplate(context)) {
+            return Mono.empty();
+        }
         return settingFetcher.fetch("basic", BasicConfig.class)
                 .map(basicConfig -> {
                     final IModelFactory modelFactory = context.getModelFactory();
@@ -54,6 +59,11 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
                 <!-- PluginLightGallery end -->
                 """.formatted(domSelector, domSelector);
     }
+
+    public boolean isContentTemplate(ITemplateContext context) {
+        return DefaultTemplateEnum.POST.getValue().equals(context.getVariable(ModelConst.TEMPLATE_ID)) || DefaultTemplateEnum.SINGLE_PAGE.getValue().equals(context.getVariable(ModelConst.TEMPLATE_ID));
+    }
+
 
     @Data
     public static class BasicConfig {
