@@ -16,4 +16,5 @@ spec:
   displayName: "lightgallery.js 灯箱"
   description: "提供对 lightgallery.js 的集成，支持在内容页放大显示图片"
   license:
-    - name: "MIT"
+    - name: "GPL-3.0"
+      url: "https://github.com/halo-sigs/plugin-lightgallery/blob/main/LICENSE"
