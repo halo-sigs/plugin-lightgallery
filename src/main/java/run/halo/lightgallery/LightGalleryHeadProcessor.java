@@ -8,9 +8,7 @@ import org.thymeleaf.model.IModelFactory;
 import org.thymeleaf.processor.element.IElementModelStructureHandler;
 import reactor.core.publisher.Mono;
 import run.halo.app.plugin.SettingFetcher;
-import run.halo.app.theme.DefaultTemplateEnum;
 import run.halo.app.theme.dialect.TemplateHeadProcessor;
-import run.halo.app.theme.router.strategy.ModelConst;
 
 /**
  * @author ryanwang
@@ -61,9 +59,8 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
     }
 
     public boolean isContentTemplate(ITemplateContext context) {
-        return DefaultTemplateEnum.POST.getValue().equals(context.getVariable(ModelConst.TEMPLATE_ID)) || DefaultTemplateEnum.SINGLE_PAGE.getValue().equals(context.getVariable(ModelConst.TEMPLATE_ID));
+        return "post".equals(context.getVariable("_templateId")) || "page".equals(context.getVariable("_templateId"));
     }
-
 
     @Data
     public static class BasicConfig {
