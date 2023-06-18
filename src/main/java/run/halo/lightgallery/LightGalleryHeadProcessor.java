@@ -40,7 +40,7 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
         return """
                 <!-- PluginLightGallery start -->
                 <link href="/plugins/PluginLightGallery/assets/static/css/lightgallery.min.css" rel="stylesheet" />
-                <script src="/plugins/PluginLightGallery/assets/static/js/lightgallery.min.js"></script>
+                <script defer src="/plugins/PluginLightGallery/assets/static/js/lightgallery.min.js"></script>
                 <script type="text/javascript">
                     document.addEventListener("DOMContentLoaded", function () {
                       const imageNodes = document.querySelectorAll(`%s img`);
