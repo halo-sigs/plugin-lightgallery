@@ -8,7 +8,23 @@ spec:
       label: 基本设置
       formSchema:
         - $formkit: text
-          help: 填写扫描图片的区域的 DOM 节点，支持 CSS 选择器，如：#content
-          label: DOM 节点选择
+          help: 填写扫描图片的区域的 DOM 节点，支持 CSS 选择器，如：#content，此设置已过时将在未来移除
+          label: 内容页面匹配
           name: dom_selector
-          validation: required
+          value: ""
+        - $formkit: repeater
+          name: rules
+          label: 页面匹配规则
+          value: [ ]
+          children:
+            - $formkit: text
+              name: pathPattern
+              label: 路径匹配
+              value: ""
+              validation: required
+              help: 用于匹配页面路径的正则表达式，如：/archives/**
+            - $formkit: text
+              name: domSelector
+              label: 匹配区域
+              help: 填写扫描图片的区域的 DOM 节点，支持 CSS 选择器，如：#content，不填写则默认为整个页面
+              value: ""
