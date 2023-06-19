@@ -3,6 +3,9 @@ package run.halo.lightgallery;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import io.micrometer.common.util.StringUtils;
 import lombok.Data;
@@ -10,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.RouteMatcher;
 import org.springframework.web.util.pattern.PathPatternRouteMatcher;
 import org.springframework.web.util.pattern.PatternParseException;
@@ -31,6 +35,7 @@ import run.halo.app.theme.dialect.TemplateHeadProcessor;
 @RequiredArgsConstructor
 public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
     private static final String TEMPLATE_ID_VARIABLE = "_templateId";
+    final PropertyPlaceholderHelper placeholderHelper = new PropertyPlaceholderHelper("${", "}");
     private final ReactiveSettingFetcher reactiveSettingFetcher;
     private final PathPatternRouteMatcher routeMatcher = new PathPatternRouteMatcher();
 
@@ -42,40 +47,47 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
                     final IModelFactory modelFactory = context.getModelFactory();
                     String domSelector = basicConfig.getDom_selector();
                     if (StringUtils.isNotBlank(domSelector) && isContentTemplate(context)) {
-                        model.add(modelFactory.createText(lightGalleryScript(domSelector)));
+                        model.add(modelFactory.createText(lightGalleryScript(Set.of(domSelector))));
                     }
 
                     MatchResult matchResult = isRequestPathMatchingRoute(context, basicConfig);
                     if (!matchResult.matched()) {
                         return;
                     }
-
-                    model.add(modelFactory.createText(lightGalleryScript(matchResult.domSelector())));
+                    model.add(modelFactory.createText(lightGalleryScript(matchResult.domSelectors())));
                 })
                 .onErrorContinue((throwable, o) -> log.warn("LightGalleryHeadProcessor process failed", throwable))
                 .then();
     }
 
-    private String lightGalleryScript(String domSelector) {
+    static String lightGalleryScript(Set<String> domSelectors) {
         return """
                 <!-- PluginLightGallery start -->
                 <link href="/plugins/PluginLightGallery/assets/static/css/lightgallery.min.css" rel="stylesheet" />
                 <script defer src="/plugins/PluginLightGallery/assets/static/js/lightgallery.min.js"></script>
                 <script type="text/javascript">
                     document.addEventListener("DOMContentLoaded", function () {
-                      const imageNodes = document.querySelectorAll(`%s img`);
-                      imageNodes.forEach(function (node) {
-                        if (node) {
-                          node.dataset.src = node.src;
-                        }
-                      });
-                      lightGallery(document.querySelector("%s"), {
-                        selector: "img",
-                      });
+                       %s
                     });
                 </script>
                 <!-- PluginLightGallery end -->
-                """.formatted(domSelector, domSelector);
+                """.formatted(instantiateGallery(domSelectors));
+    }
+
+    static String instantiateGallery(Set<String> domSelectors) {
+        return domSelectors.stream()
+                .map(domSelector -> """
+                        document.querySelectorAll(`%s img`)?.forEach(function (node) {
+                          if (node) {
+                            node.dataset.src = node.src;
+                          }
+                        });
+                        lightGallery(document.querySelector("%s"), {
+                          selector: "img",
+                        });
+                        """.formatted(domSelector, domSelector)
+                )
+                .collect(Collectors.joining("\n"));
     }
 
     public boolean isContentTemplate(ITemplateContext context) {
@@ -91,12 +103,14 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
         String requestPath = request.getRequestPath();
         RouteMatcher.Route requestRoute = routeMatcher.parseRoute(requestPath);
 
-        return basicConfig.nullSafeRules()
+        Set<String> selectors = basicConfig.nullSafeRules()
                 .stream()
                 .filter(rule -> isMatchedRoute(requestRoute, rule))
-                .findFirst()
-                .map(rule -> new MatchResult(true, defaultIfBlank(rule.getDomSelector(), "body")))
-                .orElse(MatchResult.mismatch());
+                .map(rule -> defaultIfBlank(rule.getDomSelector(), "body"))
+                .collect(Collectors.toSet());
+        return selectors.size() > 0
+                ? new MatchResult(true, selectors)
+                : MatchResult.mismatch();
     }
 
     private boolean isMatchedRoute(RouteMatcher.Route requestRoute, PathMatchRule rule) {
@@ -109,9 +123,9 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
         return false;
     }
 
-    record MatchResult(boolean matched, String domSelector) {
+    record MatchResult(boolean matched, Set<String> domSelectors) {
         public static MatchResult mismatch() {
-            return new MatchResult(false, null);
+            return new MatchResult(false, Set.of());
         }
     }
 
