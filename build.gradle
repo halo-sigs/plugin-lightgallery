@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.node-gradle.node" version "3.3.0"
+    id "com.github.node-gradle.node" version "5.0.0"
     id "run.halo.plugin.devtools" version "0.0.4"
     id "io.freefair.lombok" version "8.0.1"
     id 'java'
@@ -31,18 +31,11 @@ node {
     nodeProjectDir = file("${project.projectDir}/assets")
 }
 
-task buildFrontend(type: NpxTask) {
-    command = 'pnpm'
+task buildFrontend(type: PnpmTask) {
     args = ['build']
-}
-
-task pnpmInstall(type: NpxTask) {
-    command = "pnpm"
-    args = ["install"]
 }
 
 build {
     // build frontend before build
     tasks.getByName('compileJava').dependsOn('buildFrontend')
-    tasks.getByName("buildFrontend").dependsOn("pnpmInstall")
 }
