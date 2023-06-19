@@ -30,7 +30,7 @@ import run.halo.app.theme.dialect.TemplateHeadProcessor;
 @Component
 @RequiredArgsConstructor
 public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
-
+    private static final String TEMPLATE_ID_VARIABLE = "_templateId";
     private final ReactiveSettingFetcher reactiveSettingFetcher;
     private final PathPatternRouteMatcher routeMatcher = new PathPatternRouteMatcher();
 
@@ -41,7 +41,7 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
                 .doOnNext(basicConfig -> {
                     final IModelFactory modelFactory = context.getModelFactory();
                     String domSelector = basicConfig.getDom_selector();
-                    if (StringUtils.isNotBlank(domSelector)) {
+                    if (StringUtils.isNotBlank(domSelector) && isContentTemplate(context)) {
                         model.add(modelFactory.createText(lightGalleryScript(domSelector)));
                     }
 
@@ -76,6 +76,11 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
                 </script>
                 <!-- PluginLightGallery end -->
                 """.formatted(domSelector, domSelector);
+    }
+
+    public boolean isContentTemplate(ITemplateContext context) {
+        return "post".equals(context.getVariable(TEMPLATE_ID_VARIABLE))
+                || "page".equals(context.getVariable(TEMPLATE_ID_VARIABLE));
     }
 
     public MatchResult isRequestPathMatchingRoute(ITemplateContext context, BasicConfig basicConfig) {
