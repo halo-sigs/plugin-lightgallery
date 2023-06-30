@@ -35,7 +35,6 @@ import run.halo.app.theme.dialect.TemplateHeadProcessor;
 @RequiredArgsConstructor
 public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
     private static final String TEMPLATE_ID_VARIABLE = "_templateId";
-    final PropertyPlaceholderHelper placeholderHelper = new PropertyPlaceholderHelper("${", "}");
     private final ReactiveSettingFetcher reactiveSettingFetcher;
     private final PathPatternRouteMatcher routeMatcher = new PathPatternRouteMatcher();
 
@@ -56,7 +55,10 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
                     }
                     model.add(modelFactory.createText(lightGalleryScript(matchResult.domSelectors())));
                 })
-                .onErrorContinue((throwable, o) -> log.warn("LightGalleryHeadProcessor process failed", throwable))
+                .onErrorResume(e -> {
+                    log.error("LightGalleryHeadProcessor process failed", e);
+                    return Mono.empty();
+                })
                 .then();
     }
 
