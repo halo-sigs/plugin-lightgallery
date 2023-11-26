@@ -83,9 +83,16 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
                           if (node) {
                             node.dataset.src = node.src;
                           }
-                        });
-                        lightGallery(document.querySelector("%s"), {
-                          selector: "img",
+                          
+                          const galleries = document.querySelectorAll(`%s`);
+                            
+                          if (galleries.length > 0) {
+                            galleries.forEach(function (node) {
+                              lightGallery(node, {
+                                  selector: "img",
+                              });
+                            });
+                          }
                         });
                         """.formatted(domSelector, domSelector)
                 )
