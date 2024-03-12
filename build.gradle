@@ -1,6 +1,6 @@
 plugins {
     id "com.github.node-gradle.node" version "5.0.0"
-    id "run.halo.plugin.devtools" version "0.0.4"
+    id "run.halo.plugin.devtools" version "0.0.7"
     id "io.freefair.lombok" version "8.0.1"
     id 'java'
 }
@@ -38,4 +38,8 @@ task buildFrontend(type: PnpmTask) {
 build {
     // build frontend before build
     tasks.getByName('compileJava').dependsOn('buildFrontend')
+}
+
+halo {
+    version = '2.13'
 }

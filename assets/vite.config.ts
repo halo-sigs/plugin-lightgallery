@@ -11,6 +11,10 @@ export default defineConfig({
           src: `./node_modules/lightgallery.js/dist/*`,
           dest: "",
         },
+         {
+          src: `./node_modules/lg-zoom.js/dist/*`,
+          dest: "js/plugins/zoom/",
+        },
       ],
     }),
   ],
