@@ -3,17 +3,14 @@ package run.halo.lightgallery;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import io.micrometer.common.util.StringUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.RouteMatcher;
 import org.springframework.web.util.pattern.PathPatternRouteMatcher;
 import org.springframework.web.util.pattern.PatternParseException;
@@ -67,6 +64,8 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
                 <!-- PluginLightGallery start -->
                 <link href="/plugins/PluginLightGallery/assets/static/css/lightgallery.min.css" rel="stylesheet" />
                 <script defer src="/plugins/PluginLightGallery/assets/static/js/lightgallery.min.js"></script>
+                <!-- PluginLightGallery zoom plugin -->
+                <script defer src="/plugins/PluginLightGallery/assets/static/js/plugins/zoom/lg-zoom.min.js"></script>
                 <script type="text/javascript">
                     document.addEventListener("DOMContentLoaded", function () {
                        %s
