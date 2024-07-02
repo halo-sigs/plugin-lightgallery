@@ -2,6 +2,8 @@ apiVersion: plugin.halo.run/v1alpha1
 kind: Plugin
 metadata:
   name: PluginLightGallery
+  annotations:
+    store.halo.run/app-id: app-OoggD
 spec:
   enabled: true
   requires: ">=2.4.0"
