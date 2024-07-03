@@ -8,12 +8,14 @@ spec:
   enabled: true
   requires: ">=2.10.0"
   author:
-    name: Halo OSS Team
+    name: Halo
     website: https://github.com/halo-dev
   logo: https://halo.run/logo
   settingName: plugin-lightgallery-settings
   configMapName: plugin-lightgallery-configMap
-  homepage: https://github.com/halo-sigs/plugin-lightgallery
+  homepage: https://www.halo.run/store/apps/app-OoggD
+  repo: https://github.com/halo-sigs/plugin-lightgallery
+  issues: https://github.com/halo-sigs/plugin-lightgallery/issues
   displayName: "lightgallery.js 灯箱"
   description: "提供对 lightgallery.js 的集成，支持在内容页放大显示图片"
   license:
