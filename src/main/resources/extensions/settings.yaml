@@ -22,7 +22,7 @@ spec:
               label: 路径匹配
               value: ""
               validation: required
-              help: 用于匹配页面路径的正则表达式，如：/archives/**
+              help: 用于匹配页面路径的 PathPattern 表达式（不是正则表达式），如：/archives/**；只填写路径，不包含域名或查询参数
             - $formkit: text
               name: domSelector
               label: 匹配区域
