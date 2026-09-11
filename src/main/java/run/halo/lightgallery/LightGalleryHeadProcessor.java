@@ -61,13 +61,20 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
                     if (selectors.isEmpty()) {
                         return;
                     }
-                    model.add(modelFactory.createText(lightGalleryScript(selectors)));
+                    model.add(modelFactory.createText(lightGalleryScript(selectors) + backdropStyle(basicConfig.getBackdropColor())));
                 })
                 .onErrorResume(e -> {
                     log.error("LightGalleryHeadProcessor process failed", e);
                     return Mono.empty();
                 })
                 .then();
+    }
+
+    static String backdropStyle(String color) {
+        // Only accept hex colors, including the optional alpha channel, before writing CSS.
+        String safeColor = color != null && color.matches("#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?")
+                ? color : "#000000ff";
+        return "<style>.lg-backdrop { background-color: " + safeColor + "; }</style>";
     }
 
     static String lightGalleryScript(Set<String> domSelectors) {
@@ -144,6 +151,7 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
     @Data
     public static class BasicConfig {
         String dom_selector;
+        String backdropColor;
         List<PathMatchRule> rules;
 
         public List<PathMatchRule> nullSafeRules() {
