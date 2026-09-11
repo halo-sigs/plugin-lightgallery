@@ -3,6 +3,7 @@ package run.halo.lightgallery;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import io.micrometer.common.util.StringUtils;
@@ -49,16 +50,18 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
         return reactiveSettingFetcher.fetch("basic", BasicConfig.class)
                 .doOnNext(basicConfig -> {
                     final IModelFactory modelFactory = context.getModelFactory();
+                    Set<String> selectors = new LinkedHashSet<>();
                     String domSelector = basicConfig.getDom_selector();
                     if (StringUtils.isNotBlank(domSelector) && isContentTemplate(context)) {
-                        model.add(modelFactory.createText(lightGalleryScript(Set.of(domSelector))));
+                        selectors.add(domSelector);
                     }
 
                     MatchResult matchResult = isRequestPathMatchingRoute(context, basicConfig);
-                    if (!matchResult.matched()) {
+                    selectors.addAll(matchResult.domSelectors());
+                    if (selectors.isEmpty()) {
                         return;
                     }
-                    model.add(modelFactory.createText(lightGalleryScript(matchResult.domSelectors())));
+                    model.add(modelFactory.createText(lightGalleryScript(selectors)));
                 })
                 .onErrorResume(e -> {
                     log.error("LightGalleryHeadProcessor process failed", e);
@@ -86,22 +89,15 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
     static String instantiateGallery(Set<String> domSelectors) {
         return domSelectors.stream()
                 .map(domSelector -> """
-                        document.querySelectorAll(`%s img`)?.forEach(function (node) {
-                          if (node) {
-                            node.dataset.src = node.src;
-                          }
-                          
-                          const galleries = document.querySelectorAll(`%s`);
-                            
-                          if (galleries.length > 0) {
-                            galleries.forEach(function (node) {
-                              lightGallery(node, {
-                                  selector: "img",
-                              });
-                            });
+                        document.querySelectorAll(`%s`).forEach(function (container) {
+                          container.querySelectorAll("img").forEach(function (image) {
+                            image.dataset.src = image.src;
+                          });
+                          if (!container.getAttribute("lg-uid")) {
+                            lightGallery(container, { selector: "img" });
                           }
                         });
-                        """.formatted(domSelector, domSelector)
+                        """.formatted(domSelector)
                 )
                 .collect(Collectors.joining("\n"));
     }
