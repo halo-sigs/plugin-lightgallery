@@ -11,8 +11,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.http.server.PathContainer;
 import org.springframework.util.RouteMatcher;
 import org.springframework.web.util.pattern.PathPatternRouteMatcher;
+import org.springframework.web.util.pattern.PathPatternParser;
 import org.springframework.web.util.pattern.PatternParseException;
 import org.thymeleaf.context.Contexts;
 import org.thymeleaf.context.ITemplateContext;
@@ -33,7 +35,13 @@ import run.halo.app.theme.dialect.TemplateHeadProcessor;
 public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
     private static final String TEMPLATE_ID_VARIABLE = "_templateId";
     private final ReactiveSettingFetcher reactiveSettingFetcher;
-    private final PathPatternRouteMatcher routeMatcher = new PathPatternRouteMatcher();
+    private final PathPatternRouteMatcher routeMatcher = createRouteMatcher();
+
+    static PathPatternRouteMatcher createRouteMatcher() {
+        var parser = new PathPatternParser();
+        parser.setPathOptions(PathContainer.Options.HTTP_PATH);
+        return new PathPatternRouteMatcher(parser);
+    }
 
     @Override
     public Mono<Void> process(ITemplateContext context, IModel model,
