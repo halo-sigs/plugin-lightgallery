@@ -62,10 +62,8 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
     static String lightGalleryScript(Set<String> domSelectors) {
         return """
                 <!-- PluginLightGallery start -->
-                <link href="/plugins/PluginLightGallery/assets/static/css/lightgallery.min.css" rel="stylesheet" />
-                <script defer src="/plugins/PluginLightGallery/assets/static/js/lightgallery.min.js"></script>
-                <!-- PluginLightGallery zoom plugin -->
-                <script defer src="/plugins/PluginLightGallery/assets/static/js/plugins/zoom/lg-zoom.min.js"></script>
+                <link href="/plugins/PluginLightGallery/assets/static/main.css" rel="stylesheet" />
+                <script defer src="/plugins/PluginLightGallery/assets/static/main.js"></script>
                 <script type="text/javascript">
                     document.addEventListener("DOMContentLoaded", function () {
                        %s
