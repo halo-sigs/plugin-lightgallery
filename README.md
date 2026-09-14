@@ -61,3 +61,9 @@ halo:
 ## 主题适配
 
 此插件无需主题主动适配即可使用，其原理就是将 `lightgallery.js` 所需的依赖引入和初始化代码都自动插入到了内容页面上。因此，主题开发者无需再针对图片放大进行适配开发，如果有特殊的需求，建议共同完善此插件。
+
+## lightGallery 2
+
+图库升级为 lightGallery 2.9.0，缩放插件和样式随插件打包，无需主题额外加载资源。
+
+本项目按 GPL-3.0 发布。lightGallery 2 的默认开发密钥会在浏览器控制台显示生产使用提醒；上游要求 GPLv3 兼容项目联系作者获取密钥，正式发布前需完成该事项。参见 [上游设置文档](https://www.lightgalleryjs.com/docs/settings/#licenseKey) 和 [授权说明](https://www.lightgalleryjs.com/license/)。
