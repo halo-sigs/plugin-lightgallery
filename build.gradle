@@ -1,30 +1,33 @@
 plugins {
-    id "com.github.node-gradle.node" version "5.0.0"
-    id "run.halo.plugin.devtools" version "0.0.7"
-    id "io.freefair.lombok" version "8.0.1"
     id 'java'
+    id "com.github.node-gradle.node" version "7.1.0"
+    id "run.halo.plugin.devtools" version "0.8.0"
+    id "io.freefair.lombok" version "9.2.0"
 }
 
 group 'run.halo.lightgallery'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
 }
 
 repositories {
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/releases' }
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
-    maven { url 'https://repo.spring.io/milestone' }
     mavenCentral()
 }
 
 dependencies {
-    implementation platform('run.halo.tools.platform:plugin:2.10.0-SNAPSHOT')
+    implementation platform('run.halo.tools.platform:plugin:2.26.0')
     compileOnly 'run.halo.app:api'
-
     testImplementation 'run.halo.app:api'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test {
@@ -33,21 +36,36 @@ test {
 
 node {
     nodeProjectDir = file("${project.projectDir}/assets")
+    pnpmVersion = '9.15.0'
 }
 
-tasks.register('installDepsForUI', PnpmTask) {
-    args = ['install']
+tasks.named('pnpmInstall') {
+    args = ['--frozen-lockfile']
 }
 
 tasks.register('buildFrontend', PnpmTask) {
     args = ['build']
-    dependsOn('installDepsForUI')
+    dependsOn tasks.named('pnpmInstall')
+    inputs.dir('assets/src')
+    inputs.files('assets/package.json', 'assets/pnpm-lock.yaml',
+        'assets/tsconfig.json', 'assets/vite.config.ts')
+    outputs.dir(layout.buildDirectory.dir('generated-resources/static'))
 }
 
-tasks.named('build').configure {
-    dependsOn('buildFrontend')
+// Package generated assets, never stale copies from the source tree.
+sourceSets.main.resources.setSrcDirs([])
+tasks.named('processResources') {
+    dependsOn tasks.named('buildFrontend')
+    from('src/main/resources') {
+        exclude 'static/**'
+    }
+    from(layout.buildDirectory.dir('generated-resources'))
+}
+
+tasks.named('generatePluginComponentsIdx') {
+    notCompatibleWithConfigurationCache('Plugin component indexing accesses Task.project.')
 }
 
 halo {
-    version = '2.13'
+    version = '2.26.1'
 }
