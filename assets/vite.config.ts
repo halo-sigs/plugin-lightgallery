@@ -3,7 +3,7 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   build: {
-    outDir: fileURLToPath(new URL("../src/main/resources/static", import.meta.url)),
+    outDir: fileURLToPath(new URL("../build/generated-resources/static", import.meta.url)),
     emptyOutDir: true,
     lib: {
       entry: "src/index.ts",

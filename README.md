@@ -4,6 +4,8 @@
 
 ## 开发环境
 
+需要 Java 21、Node.js 22、pnpm 9.15.0，运行环境为 Halo 2.26.0 或更高版本。
+
 ```bash
 git clone git@github.com:halo-sigs/plugin-lightgallery.git
 
