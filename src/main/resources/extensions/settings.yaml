@@ -22,9 +22,15 @@ spec:
               label: 路径匹配
               value: ""
               validation: required
-              help: 用于匹配页面路径的正则表达式，如：/archives/**
+              help: 用于匹配页面路径的 PathPattern 表达式（不是正则表达式），如：/archives/**；只填写路径，不包含域名或查询参数
             - $formkit: text
               name: domSelector
               label: 匹配区域
               help: 填写扫描图片的区域的 DOM 节点，支持 CSS 选择器，如：#content，不填写则默认为整个页面
               value: ""
+        - $formkit: color
+          name: backdropColor
+          label: 灯箱背景颜色
+          format: hex8
+          value: "#000000ff"
+          help: 支持调整透明度，默认为不透明黑色；透明背景下仍需保证图片和工具栏清晰可见。

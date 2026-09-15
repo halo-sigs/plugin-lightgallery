@@ -16,4 +16,7 @@ jobs:
     with:
       app-id: app-OoggD
       ui-path: "assets"
+      java-version: "21"
+      node-version: "22"
+      pnpm-version: "9.15.0"
 

@@ -3,6 +3,7 @@ package run.halo.lightgallery;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import io.micrometer.common.util.StringUtils;
@@ -11,8 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.http.server.PathContainer;
 import org.springframework.util.RouteMatcher;
 import org.springframework.web.util.pattern.PathPatternRouteMatcher;
+import org.springframework.web.util.pattern.PathPatternParser;
 import org.springframework.web.util.pattern.PatternParseException;
 import org.thymeleaf.context.Contexts;
 import org.thymeleaf.context.ITemplateContext;
@@ -33,7 +36,13 @@ import run.halo.app.theme.dialect.TemplateHeadProcessor;
 public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
     private static final String TEMPLATE_ID_VARIABLE = "_templateId";
     private final ReactiveSettingFetcher reactiveSettingFetcher;
-    private final PathPatternRouteMatcher routeMatcher = new PathPatternRouteMatcher();
+    private final PathPatternRouteMatcher routeMatcher = createRouteMatcher();
+
+    static PathPatternRouteMatcher createRouteMatcher() {
+        var parser = new PathPatternParser();
+        parser.setPathOptions(PathContainer.Options.HTTP_PATH);
+        return new PathPatternRouteMatcher(parser);
+    }
 
     @Override
     public Mono<Void> process(ITemplateContext context, IModel model,
@@ -41,16 +50,18 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
         return reactiveSettingFetcher.fetch("basic", BasicConfig.class)
                 .doOnNext(basicConfig -> {
                     final IModelFactory modelFactory = context.getModelFactory();
+                    Set<String> selectors = new LinkedHashSet<>();
                     String domSelector = basicConfig.getDom_selector();
                     if (StringUtils.isNotBlank(domSelector) && isContentTemplate(context)) {
-                        model.add(modelFactory.createText(lightGalleryScript(Set.of(domSelector))));
+                        selectors.add(domSelector);
                     }
 
                     MatchResult matchResult = isRequestPathMatchingRoute(context, basicConfig);
-                    if (!matchResult.matched()) {
+                    selectors.addAll(matchResult.domSelectors());
+                    if (selectors.isEmpty()) {
                         return;
                     }
-                    model.add(modelFactory.createText(lightGalleryScript(matchResult.domSelectors())));
+                    model.add(modelFactory.createText(lightGalleryScript(selectors) + backdropStyle(basicConfig.getBackdropColor())));
                 })
                 .onErrorResume(e -> {
                     log.error("LightGalleryHeadProcessor process failed", e);
@@ -59,13 +70,18 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
                 .then();
     }
 
+    static String backdropStyle(String color) {
+        // Only accept hex colors, including the optional alpha channel, before writing CSS.
+        String safeColor = color != null && color.matches("#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?")
+                ? color : "#000000ff";
+        return "<style>.lg-backdrop { background-color: " + safeColor + "; }</style>";
+    }
+
     static String lightGalleryScript(Set<String> domSelectors) {
         return """
                 <!-- PluginLightGallery start -->
-                <link href="/plugins/PluginLightGallery/assets/static/css/lightgallery.min.css" rel="stylesheet" />
-                <script defer src="/plugins/PluginLightGallery/assets/static/js/lightgallery.min.js"></script>
-                <!-- PluginLightGallery zoom plugin -->
-                <script defer src="/plugins/PluginLightGallery/assets/static/js/plugins/zoom/lg-zoom.min.js"></script>
+                <link href="/plugins/PluginLightGallery/assets/static/main.css" rel="stylesheet" />
+                <script defer src="/plugins/PluginLightGallery/assets/static/main.js"></script>
                 <script type="text/javascript">
                     document.addEventListener("DOMContentLoaded", function () {
                        %s
@@ -78,22 +94,15 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
     static String instantiateGallery(Set<String> domSelectors) {
         return domSelectors.stream()
                 .map(domSelector -> """
-                        document.querySelectorAll(`%s img`)?.forEach(function (node) {
-                          if (node) {
-                            node.dataset.src = node.src;
-                          }
-                          
-                          const galleries = document.querySelectorAll(`%s`);
-                            
-                          if (galleries.length > 0) {
-                            galleries.forEach(function (node) {
-                              lightGallery(node, {
-                                  selector: "img",
-                              });
-                            });
+                        document.querySelectorAll(`%s`).forEach(function (container) {
+                          container.querySelectorAll("img").forEach(function (image) {
+                            image.dataset.src = image.src;
+                          });
+                          if (!container.getAttribute("lg-uid")) {
+                            lightGallery(container, { selector: "img" });
                           }
                         });
-                        """.formatted(domSelector, domSelector)
+                        """.formatted(domSelector)
                 )
                 .collect(Collectors.joining("\n"));
     }
@@ -140,6 +149,7 @@ public class LightGalleryHeadProcessor implements TemplateHeadProcessor {
     @Data
     public static class BasicConfig {
         String dom_selector;
+        String backdropColor;
         List<PathMatchRule> rules;
 
         public List<PathMatchRule> nullSafeRules() {
