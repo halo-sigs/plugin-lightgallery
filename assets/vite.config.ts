@@ -20,7 +20,7 @@ export default defineConfig({
   ],
   build: {
     outDir: fileURLToPath(
-      new URL("../src/main/resources/static", import.meta.url)
+      new URL("../build/generated-resources/static", import.meta.url)
     ),
     emptyOutDir: true,
     lib: {
